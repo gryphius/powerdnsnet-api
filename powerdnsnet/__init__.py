@@ -9,18 +9,32 @@ class PowerdnsNet(object):
 
         self.cache_zonename_id=None
 
+        self.debug=False
 
     def add_native_domain(self,zone_name):
         raise Exception("not implemented")
 
-    def add_record_to_zone(self):
-        raise Exception("not implemented")
+    def add_record_to_zone(self,zone,name,content,rtype='A',ttl=3600,prio=0):
+        """Add record to zone, returns ID of the new record"""
+        zoneid=self.expect_zone_id(zone)
+        args={
+            'zoneId':zoneid,
+            'Name':name,
+            'Type':rtype,
+            'Content':content,
+            'TimeToLive':ttl,
+            'Priority':prio,
+        }
+        result=self.soap_request('addRecordToZone',args)
+        for child in result:
+            if child.tag=='{http://powerdns.net/express}Id':
+                return int(child.text)
 
     def delete_all_records_for_domain(self):
         raise Exception("not implemented")
 
-    def delete_record_by_id(self):
-        raise Exception("not implemented")
+    def delete_record_by_id(self,recordid):
+        result=self.soap_request('deleteRecordById',dict(recordId=recordid))
 
     def delete_zone_by_id(self):
         raise Exception("not implemented")
@@ -34,7 +48,10 @@ class PowerdnsNet(object):
     def list_records(self,zone,rtype=None):
         """Returns a list of all records in a zone. If rtype is specified, only returns that record type. Return value is a list of Record objects"""
         zoneid=self.expect_zone_id(zone)
-        recordlist = self.soap_request("listRecords",dict(zoneId=zoneid))
+        if rtype!=None: # TODO: doesn't work yet... argument order doesn't seem to be the prob. what else?
+            recordlist = self.soap_request("listRecordsByType",dict(zoneId=zoneid,Type=rtype.upper()))
+        else:
+            recordlist = self.soap_request("listRecords",dict(zoneId=zoneid))
 
         retlist=[]
 
@@ -118,10 +135,16 @@ class PowerdnsNet(object):
             'Content-Type': 'application/soap+xml; charset=utf-8'
         }
         data = self._build_soap_request(method,arguments)
-        #print data # debug soap request
+        if self.debug:
+            self.debug_out("Request: \n%s"%data)
+
         req = urllib2.Request(url, data, headers)
         response = urllib2.urlopen(req)
         the_page = response.read()
+
+        if self.debug:
+            self.debug_out("Response: \n%s"%the_page)
+
         tree=et.fromstring(the_page)
         body=tree[0]
         xmlresponse = body[0]
@@ -133,8 +156,15 @@ class PowerdnsNet(object):
             ex.code=int(code.text)
             ex.description=description.text
             raise ex
-        interestingpart=xmlresult[2]
-        return interestingpart
+
+        if len(xmlresult)>2:
+            interestingpart=xmlresult[2]
+            return interestingpart
+        else:
+            return None
+
+    def debug_out(self,msg):
+        print msg
 
 class APIException(Exception):
     pass
