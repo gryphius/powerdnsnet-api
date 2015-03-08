@@ -4,7 +4,7 @@ Notes:
  * instantiate the PowerdnsNet object with the API key found in your powerdns control panel (MYPOWERDNS -> API Access)
  * if a method expects a 'zone' argument this can be either a Zone object as returned by list_zones/add_native_domain, a zone name or the zone id
  * if a method expects a 'record' argument this can be either a Record object as returned by list_records/add_record_to_zone or a record id
- * the API does not to any client-side input validation
+ * the API does not perform any input validation
 
 Example usage
 
