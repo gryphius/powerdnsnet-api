@@ -1,4 +1,6 @@
 .idea/
 *.pyc
 
-cr.py
+build/
+dist/
+powerdnsnet.egg-info/
