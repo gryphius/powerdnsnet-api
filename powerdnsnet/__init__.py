@@ -208,11 +208,12 @@ class PowerdnsNet(object):
         zone.type=node[4].text
         #notified_serial= .. always 0)
         zone.account=node[6].text
-        zone.active=bool(int(node[7].text))
-        datestr=node[8].text
-        zone.expires=datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%S")
-        zone.level=node[9].text
-        zone.validdns= (node[10].text=='true')
+
+        #zone.active=bool(int(node[7].text))
+        #datestr=node[8].text
+        #zone.expires=datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%S")
+        #zone.level=node[9].text
+        #zone.validdns= (node[10].text=='true')
         return zone
 
 class APIException(Exception):
